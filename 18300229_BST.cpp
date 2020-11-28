@@ -70,7 +70,7 @@ int main()
 
 		switch (choice)
 		{
-		case '1':	//Add
+		case '1':	//Insert new node.
 			cout << endl << "*** Press <Left control Key> on your last the node to finish inserting. ***" << endl;
 			cout << "*** Data input will automatically stop after 100 elements." << endl << endl;
 			for (int i = 0; (GetAsyncKeyState(VK_LCONTROL)) == false and i < 100; i++)
@@ -86,42 +86,49 @@ int main()
 			}
 			break;
 
-		case '2':	//Search
+		case '2':	//Delete a node
 			if (root == NULL)
 			{
 				cout << "Tree is empty, nothing to delete" << endl;
-				continue;
+				break;
 			}
 			cout << "Enter the number to be deleted : ";
 			cin >> keyInput;
 			bstTrial.del(keyInput);
 			break;
 
-		case '3': //Show Value
+		case '3':	//Show inorder
 			cout << "Inorder Traversal of BST:" << endl;
 			bstTrial.inorder(root);
 			cout << endl;
 			break;
 
-		case '4': //Count
+		case '4':	//Show preorder
 			cout << "Preorder Traversal of BST:" << endl;
 			bstTrial.preorder(root);
 			cout << endl;
 			break;
 
-		case '5': //Show all items
+		case '5':	//Showr postorder
 			cout << "Postorder Traversal of BST:" << endl;
 			bstTrial.postorder(root);
 			cout << endl;
 			break;
 
-		case '6': //Update
+		case '6':	//Try to print BST
 			cout << "Display BST:" << endl;
 			bstTrial.display(root, 1);
 			cout << endl;
-			break;;
+			break;
 
-		case '7':	//Delete particular
+		case '7':	//Calculate tree depth
+			break;
+
+		case '8':	//Delete the whole tree
+			break;
+
+		case '9':	//Exit program
+			cout << "Thanks for using the program" << endl << endl;
 			exit(1);
 			break;
 
@@ -247,6 +254,7 @@ void BST::del(int item)
 	if (location->left != NULL && location->right != NULL)
 		case_c(parent, location);
 	free(location);
+	cout << "Element deleted successfully.";
 }
 
 /*
