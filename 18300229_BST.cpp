@@ -1,285 +1,400 @@
-// 18300229_BST.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include <iostream>
-#include <cstdlib>
+// 18300229_BST - Arbol Busqueda Binaria
+# include <iostream>
+# include <cstdlib>
+#include <conio.h>
+#include <windows.h>
 using namespace std;
 
-class BinarySearchTree
+/*
+ * Class Declaration
+ */
+
+struct node
 {
-private:
-	struct tree_node
-	{
-		tree_node* left;
-		tree_node* right;
-		int data;
-	};
-	tree_node* root;
+	int key;
+	struct node* left;
+	struct node* right;
+};
+
+node* root;
+
+class BST
+{
 public:
-	BinarySearchTree()
+
+	void find(int, node**, node**);
+	void insert(node*, node*);
+	void del(int);
+	void case_a(node*, node*);
+	void case_b(node*, node*);
+	void case_c(node*, node*);
+	void preorder(node*);
+	void inorder(node*);
+	void postorder(node*);
+	void display(node*, int);
+	BST()
 	{
 		root = NULL;
 	}
-	bool isEmpty() const { return root == NULL; }
-	void print_inorder();
-	void inorder(tree_node*);
-	void print_preorder();
-	void preorder(tree_node*);
-	void print_postorder();
-	void postorder(tree_node*);
-	void insert(int);
-	void remove(int);
 };
-
-// Smaller elements go left
-// larger elements go right
-void BinarySearchTree::insert(int d)
-{
-	tree_node* t = new tree_node;
-	tree_node* parent;
-	t->data = d;
-	t->left = NULL;
-	t->right = NULL;
-	parent = NULL;
-	// is this a new tree?
-	if (isEmpty()) root = t;
-	else
-	{
-		//Note: ALL insertions are as leaf nodes
-		tree_node* curr;
-		curr = root;
-		// Find the Node's parent
-		while (curr)
-		{
-			parent = curr;
-			if (t->data > curr->data) curr = curr->right;
-			else curr = curr->left;
-		}
-
-		if (t->data < parent->data)
-			parent->left = t;
-		else
-			parent->right = t;
-	}
-}
-
-void BinarySearchTree::remove(int d)
-{
-	//Locate the element
-	bool found = false;
-	if (isEmpty())
-	{
-		cout << " This Tree is empty! " << endl;
-		return;
-	}
-	tree_node* curr;
-	tree_node* parent = nullptr;
-	curr = root;
-	while (curr != NULL)
-	{
-		if (curr->data == d)
-		{
-			found = true;
-			break;
-		}
-		else
-		{
-			parent = curr;
-			if (d > curr->data) curr = curr->right;
-			else curr = curr->left;
-		}
-	}
-	if (!found)
-	{
-		cout << " Data not found! " << endl;
-		return;
-	}
-
-	// 3 cases :
-// 1. We're removing a leaf node
-// 2. We're removing a node with a single child
-// 3. we're removing a node with 2 children
-
-// Node with single child
-	if ((curr->left == NULL && curr->right != NULL) || (curr->left != NULL
-		&& curr->right == NULL))
-	{
-		if (curr->left == NULL && curr->right != NULL)
-		{
-			if (parent->left == curr)
-			{
-				parent->left = curr->right;
-				delete curr;
-			}
-			else
-			{
-				parent->right = curr->right;
-				delete curr;
-			}
-		}
-		else // left child present, no right child
-		{
-			if (parent->left == curr)
-			{
-				parent->left = curr->left;
-				delete curr;
-			}
-			else
-			{
-				parent->right = curr->left;
-				delete curr;
-			}
-		}
-		return;
-	}
-
-	//We're looking at a leaf node
-	if (curr->left == NULL && curr->right == NULL)
-	{
-		if (parent->left == curr) parent->left = NULL;
-		else parent->right = NULL;
-		delete curr;
-		return;
-	}
-
-	//Node with 2 children
-	// replace node with smallest value in right subtree
-	if (curr->left != NULL && curr->right != NULL)
-	{
-		tree_node* chkr;
-		chkr = curr->right;
-		if ((chkr->left == NULL) && (chkr->right == NULL))
-		{
-			curr = chkr;
-			delete chkr;
-			curr->right = NULL;
-		}
-		else // right child has children
-		{
-			//if the node's right child has a left child
-			// Move all the way down left to locate smallest element
-
-			if ((curr->right)->left != NULL)
-			{
-				tree_node* lcurr;
-				tree_node* lcurrp;
-				lcurrp = curr->right;
-				lcurr = (curr->right)->left;
-				while (lcurr->left != NULL)
-				{
-					lcurrp = lcurr;
-					lcurr = lcurr->left;
-				}
-				curr->data = lcurr->data;
-				delete lcurr;
-				lcurrp->left = NULL;
-			}
-			else
-			{
-				tree_node* tmp;
-				tmp = curr->right;
-				curr->data = tmp->data;
-				curr->right = tmp->right;
-				delete tmp;
-			}
-		}
-		return;
-	}
-}
-
-void BinarySearchTree::print_inorder()
-{
-	inorder(root);
-}
-
-void BinarySearchTree::inorder(tree_node* p)
-{
-	if (p != NULL)
-	{
-		if (p->left) inorder(p->left);
-		cout << " " << p->data << " ";
-		if (p->right) inorder(p->right);
-	}
-	else return;
-}
-
-void BinarySearchTree::print_preorder()
-{
-	preorder(root);
-}
-
-void BinarySearchTree::preorder(tree_node* p)
-{
-	if (p != NULL)
-	{
-		cout << " " << p->data << " ";
-		if (p->left) preorder(p->left);
-		if (p->right) preorder(p->right);
-	}
-	else return;
-}
-
-void BinarySearchTree::print_postorder()
-{
-	postorder(root);
-}
-
-void BinarySearchTree::postorder(tree_node* p)
-{
-	if (p != NULL)
-	{
-		if (p->left) postorder(p->left);
-		if (p->right) postorder(p->right);
-		cout << " " << p->data << " ";
-	}
-	else return;
-}
-
+/*
+ * Main Contains Menu
+ */
 int main()
 {
-	BinarySearchTree b;
-	int ch, tmp, tmp1;
-	while (1)
+	char choice = 0;
+	int	keyInput = 0;
+	BST bstTrial;
+	node* inputNode = nullptr;
+	do
 	{
-		cout << endl << endl;
-		cout << " Binary Search Tree Operations " << endl;
-		cout << " ----------------------------- " << endl;
-		cout << " 1. Insertion/Creation " << endl;
-		cout << " 2. In-Order Traversal " << endl;
-		cout << " 3. Pre-Order Traversal " << endl;
-		cout << " 4. Post-Order Traversal " << endl;
-		cout << " 5. Removal " << endl;
-		cout << " 6. Exit " << endl;
-		cout << " Enter your choice : ";
-		cin >> ch;
-		switch (ch)
+		char choice = 0;
+		system("cls");
+		cout << "========Binary Search Tree=========" << endl;
+
+		do //Loop until correct input
 		{
-		case 1: cout << " Enter Number to be inserted : ";
-			cin >> tmp;
-			b.insert(tmp);
+			cout << endl << "Choose an option" << endl;
+			cout << "[1] Insert a new node." << endl;
+			cout << "[2] Delete a node." << endl;
+			cout << "[3] Display In-order traversal." << endl;
+			cout << "[4] Display Pre-order traversal." << endl;
+			cout << "[5] Display Post-order traversal." << endl;
+			cout << "[6] Show current tree" << endl;
+			cout << "[7] Calculate depth of the tree." << endl;
+			cout << "[8] Delete everything in the tree." << endl;
+			cout << "[9] Exit." << endl;
+			cout << ">Answer: "; choice = _getch();
+			system("cls");
+		} while (choice < 49 or choice > 57); //ASCII from 1 to 9.
+
+		switch (choice)
+		{
+		case '1':	//Add
+			cout << endl << "*** Press <Left control Key> on your last the node to finish inserting. ***" << endl;
+			cout << "*** Data input will automatically stop after 100 elements." << endl << endl;
+			for (int i = 0; (GetAsyncKeyState(VK_LCONTROL)) == false and i < 100; i++)
+			{
+				if ((GetAsyncKeyState(VK_LCONTROL)) == false)
+				{
+					inputNode = new node;
+					cout << "Node: ";
+					cin >> inputNode->key;
+					bstTrial.insert(root, inputNode);
+				}
+				GetAsyncKeyState; //Gets the current pressed key from the user.
+			}
 			break;
-		case 2: cout << endl;
-			cout << " In-Order Traversal " << endl;
-			cout << " -------------------" << endl;
-			b.print_inorder();
+
+		case '2':	//Search
+			if (root == NULL)
+			{
+				cout << "Tree is empty, nothing to delete" << endl;
+				continue;
+			}
+			cout << "Enter the number to be deleted : ";
+			cin >> keyInput;
+			bstTrial.del(keyInput);
 			break;
-		case 3: cout << endl;
-			cout << " Pre-Order Traversal " << endl;
-			cout << " -------------------" << endl;
-			b.print_preorder();
+
+		case '3': //Show Value
+			cout << "Inorder Traversal of BST:" << endl;
+			bstTrial.inorder(root);
+			cout << endl;
 			break;
-		case 4: cout << endl;
-			cout << " Post-Order Traversal " << endl;
-			cout << " --------------------" << endl;
-			b.print_postorder();
+
+		case '4': //Count
+			cout << "Preorder Traversal of BST:" << endl;
+			bstTrial.preorder(root);
+			cout << endl;
 			break;
-		case 5: cout << " Enter data to be deleted : ";
-			cin >> tmp1;
-			b.remove(tmp1);
+
+		case '5': //Show all items
+			cout << "Postorder Traversal of BST:" << endl;
+			bstTrial.postorder(root);
+			cout << endl;
 			break;
-		case 6: system("pause");
-			return 0;
+
+		case '6': //Update
+			cout << "Display BST:" << endl;
+			bstTrial.display(root, 1);
+			cout << endl;
+			break;;
+
+		case '7':	//Delete particular
+			exit(1);
+			break;
+
+		default:
 			break;
 		}
+
+		cout << endl;
+		system("pause");
+	} while (1);	//Never ending loop
+}
+
+/*
+ * Find Element in the Tree
+ */
+void BST::find(int item, node** par, node** loc)
+{
+	node* ptr, * ptrsave;
+	if (root == NULL)
+	{
+		*loc = NULL;
+		*par = NULL;
+		return;
+	}
+	if (item == root->key)
+	{
+		*loc = root;
+		*par = NULL;
+		return;
+	}
+	if (item < root->key)
+		ptr = root->left;
+	else
+		ptr = root->right;
+	ptrsave = root;
+	while (ptr != NULL)
+	{
+		if (item == ptr->key)
+		{
+			*loc = ptr;
+			*par = ptrsave;
+			return;
+		}
+		ptrsave = ptr;
+		if (item < ptr->key)
+			ptr = ptr->left;
+		else
+			ptr = ptr->right;
+	}
+	*loc = NULL;
+	*par = ptrsave;
+}
+
+/*
+ * Inserting Element into the Tree
+ */
+void BST::insert(node* tree, node* newnode)
+{
+	if (root == NULL)
+	{
+		root = new node;
+		root->key = newnode->key;
+		root->left = NULL;
+		root->right = NULL;
+		cout << "Root Node is Added" << endl;
+		return;
+	}
+	if (tree->key > newnode->key)
+	{
+		if (tree->left != NULL)
+		{
+			insert(tree->left, newnode);
+		}
+		else
+		{
+			tree->left = newnode;
+			(tree->left)->left = NULL;
+			(tree->left)->right = NULL;
+			cout << "Node Added To Left" << endl;
+			return;
+		}
+	}
+	else
+	{
+		if (tree->right != NULL)
+		{
+			insert(tree->right, newnode);
+		}
+		else
+		{
+			tree->right = newnode;
+			(tree->right)->left = NULL;
+			(tree->right)->right = NULL;
+			cout << "Node Added To Right" << endl;
+			return;
+		}
+	}
+}
+
+/*
+ * Delete Element from the tree
+ */
+void BST::del(int item)
+{
+	node* parent, * location;
+	if (root == NULL)
+	{
+		cout << "Tree empty" << endl;
+		return;
+	}
+	find(item, &parent, &location);
+	if (location == NULL)
+	{
+		cout << "Item not present in tree" << endl;
+		return;
+	}
+	if (location->left == NULL && location->right == NULL)
+		case_a(parent, location);
+	if (location->left != NULL && location->right == NULL)
+		case_b(parent, location);
+	if (location->left == NULL && location->right != NULL)
+		case_b(parent, location);
+	if (location->left != NULL && location->right != NULL)
+		case_c(parent, location);
+	free(location);
+}
+
+/*
+ * Case A
+ */
+void BST::case_a(node* par, node* loc)
+{
+	if (par == NULL)
+	{
+		root = NULL;
+	}
+	else
+	{
+		if (loc == par->left)
+			par->left = NULL;
+		else
+			par->right = NULL;
+	}
+}
+
+/*
+ * Case B
+ */
+void BST::case_b(node* par, node* loc)
+{
+	node* child;
+	if (loc->left != NULL)
+		child = loc->left;
+	else
+		child = loc->right;
+	if (par == NULL)
+	{
+		root = child;
+	}
+	else
+	{
+		if (loc == par->left)
+			par->left = child;
+		else
+			par->right = child;
+	}
+}
+
+/*
+ * Case C
+ */
+void BST::case_c(node* par, node* loc)
+{
+	node* ptr, * ptrsave, * suc, * parsuc;
+	ptrsave = loc;
+	ptr = loc->right;
+	while (ptr->left != NULL)
+	{
+		ptrsave = ptr;
+		ptr = ptr->left;
+	}
+	suc = ptr;
+	parsuc = ptrsave;
+	if (suc->left == NULL && suc->right == NULL)
+		case_a(parsuc, suc);
+	else
+		case_b(parsuc, suc);
+	if (par == NULL)
+	{
+		root = suc;
+	}
+	else
+	{
+		if (loc == par->left)
+			par->left = suc;
+		else
+			par->right = suc;
+	}
+	suc->left = loc->left;
+	suc->right = loc->right;
+}
+
+/*
+ * Pre Order Traversal
+ */
+void BST::preorder(node* ptr)
+{
+	if (root == NULL)
+	{
+		cout << "Tree is empty" << endl;
+		return;
+	}
+	if (ptr != NULL)
+	{
+		cout << ptr->key << "  ";
+		preorder(ptr->left);
+		preorder(ptr->right);
+	}
+}
+/*
+ * In Order Traversal
+ */
+void BST::inorder(node* ptr)
+{
+	if (root == NULL)
+	{
+		cout << "Tree is empty" << endl;
+		return;
+	}
+	if (ptr != NULL)
+	{
+		inorder(ptr->left);
+		cout << ptr->key << "  ";
+		inorder(ptr->right);
+	}
+}
+
+/*
+ * Postorder Traversal
+ */
+void BST::postorder(node* ptr)
+{
+	if (root == NULL)
+	{
+		cout << "Tree is empty" << endl;
+		return;
+	}
+	if (ptr != NULL)
+	{
+		postorder(ptr->left);
+		postorder(ptr->right);
+		cout << ptr->key << "  ";
+	}
+}
+
+/*
+ * Display Tree Structure
+ */
+void BST::display(node* ptr, int level)
+{
+	int i;
+	if (ptr != NULL)
+	{
+		display(ptr->right, level + 1);
+		cout << endl;
+		if (ptr == root)
+			cout << "Root->:  ";
+		else
+		{
+			for (i = 0; i < level; i++)
+				cout << "       ";
+		}
+		cout << ptr->key;
+		display(ptr->left, level + 1);
 	}
 }
