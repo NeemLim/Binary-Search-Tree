@@ -2,19 +2,112 @@
 //
 
 #include <iostream>
+using namespace std;
 
-int main()
-{
-    std::cout << "Hello World!\n";
+struct node {
+	int key;
+	struct node* left, * right;
+};
+
+// Create a node
+struct node* newNode(int item) {
+	struct node* temp = (struct node*)malloc(sizeof(struct node));
+	temp->key = item;
+	temp->left = temp->right = NULL;
+	return temp;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+// Inorder Traversal
+void inorder(struct node* root) {
+	if (root != NULL) {
+		// Traverse left
+		inorder(root->left);
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+		// Traverse root
+		cout << root->key << " -> ";
+
+		// Traverse right
+		inorder(root->right);
+	}
+}
+
+// Insert a node
+struct node* insert(struct node* node, int key) {
+	// Return a new node if the tree is empty
+	if (node == NULL) return newNode(key);
+
+	// Traverse to the right place and insert the node
+	if (key < node->key)
+		node->left = insert(node->left, key);
+	else
+		node->right = insert(node->right, key);
+
+	return node;
+}
+
+// Find the inorder successor
+struct node* minValueNode(struct node* node) {
+	struct node* current = node;
+
+	// Find the leftmost leaf
+	while (current && current->left != NULL)
+		current = current->left;
+
+	return current;
+}
+
+// Deleting a node
+struct node* deleteNode(struct node* root, int key) {
+	// Return if the tree is empty
+	if (root == NULL) return root;
+
+	// Find the node to be deleted
+	if (key < root->key)
+		root->left = deleteNode(root->left, key);
+	else if (key > root->key)
+		root->right = deleteNode(root->right, key);
+	else {
+		// If the node is with only one child or no child
+		if (root->left == NULL) {
+			struct node* temp = root->right;
+			free(root);
+			return temp;
+		}
+		else if (root->right == NULL) {
+			struct node* temp = root->left;
+			free(root);
+			return temp;
+		}
+
+		// If the node has two children
+		struct node* temp = minValueNode(root->right);
+
+		// Place the inorder successor in position of the node to be deleted
+		root->key = temp->key;
+
+		// Delete the inorder successor
+		root->right = deleteNode(root->right, temp->key);
+	}
+	return root;
+}
+
+// Driver code
+int main() {
+	struct node* root = NULL;
+	root = insert(root, 8);
+	root = insert(root, 3);
+	root = insert(root, 1);
+	root = insert(root, 6);
+	root = insert(root, 7);
+	root = insert(root, 10);
+	root = insert(root, 14);
+	root = insert(root, 4);
+
+	cout << "Inorder traversal: ";
+	inorder(root);
+
+	cout << "\nAfter deleting 10\n";
+	root = deleteNode(root, 10);
+	cout << "Inorder traversal: ";
+	inorder(root);
+}
