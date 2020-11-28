@@ -2,416 +2,284 @@
 //
 
 #include <iostream>
+#include <cstdlib>
 using namespace std;
 
-class BSTNode
-{
-public:
-	int Key;
-	BSTNode* Left;
-	BSTNode* Right;
-	BSTNode* Parent;
-	int Height;
-};
-
-class BST
+class BinarySearchTree
 {
 private:
-	BSTNode* root;
-
-protected:
-	BSTNode* Insert(BSTNode* node, int key);
-	void PrintTreeInOrder(BSTNode* node);
-	BSTNode* Search(BSTNode* node, int key);
-	int FindMin(BSTNode* node);
-	int FindMax(BSTNode* node);
-	int Successor(BSTNode* node);
-	int Predecessor(BSTNode* node);
-	BSTNode* Remove(BSTNode* node, int v);
-
+	struct tree_node
+	{
+		tree_node* left;
+		tree_node* right;
+		int data;
+	};
+	tree_node* root;
 public:
-	BST();
-
-	void Insert(int key);
-	void PrintTreeInOrder();
-	bool Search(int key);
-	int FindMin();
-	int FindMax();
-	int Successor(int key);
-	int Predecessor(int key);
-	void Remove(int v);
+	BinarySearchTree()
+	{
+		root = NULL;
+	}
+	bool isEmpty() const { return root == NULL; }
+	void print_inorder();
+	void inorder(tree_node*);
+	void print_preorder();
+	void preorder(tree_node*);
+	void print_postorder();
+	void postorder(tree_node*);
+	void insert(int);
+	void remove(int);
 };
-BST::BST() : root(NULL)
-{
-}
 
-BSTNode* BST::Insert(BSTNode* node, int key)
+// Smaller elements go left
+// larger elements go right
+void BinarySearchTree::insert(int d)
 {
-	// If BST doesn't exist
-	// create a new node as root
-	// or it's reached when
-	// there's no any child node
-	// so we can insert a new node here
-	if (node == NULL)
-	{
-		node = new BSTNode;
-		node->Key = key;
-		node->Left = NULL;
-		node->Right = NULL;
-		node->Parent = NULL;
-	}
-	// If the given key is greater than
-	// node's key then go to right subtree
-	else if (node->Key < key)
-	{
-		node->Right = Insert(node->Right, key);
-		node->Right->Parent = node;
-	}
-	// If the given key is smaller than
-	// node's key then go to left subtree
+	tree_node* t = new tree_node;
+	tree_node* parent;
+	t->data = d;
+	t->left = NULL;
+	t->right = NULL;
+	parent = NULL;
+	// is this a new tree?
+	if (isEmpty()) root = t;
 	else
 	{
-		node->Left = Insert(node->Left, key);
-		node->Left->Parent = node;
+		//Note: ALL insertions are as leaf nodes
+		tree_node* curr;
+		curr = root;
+		// Find the Node's parent
+		while (curr)
+		{
+			parent = curr;
+			if (t->data > curr->data) curr = curr->right;
+			else curr = curr->left;
+		}
+
+		if (t->data < parent->data)
+			parent->left = t;
+		else
+			parent->right = t;
 	}
-
-	return node;
 }
 
-void BST::Insert(int key)
+void BinarySearchTree::remove(int d)
 {
-	// Invoking Insert() function
-	// and passing root node and given key
-	root = Insert(root, key);
-}
-
-void BST::PrintTreeInOrder(BSTNode* node)
-{
-	// Stop printing if no node found
-	if (node == NULL)
+	//Locate the element
+	bool found = false;
+	if (isEmpty())
+	{
+		cout << " This Tree is empty! " << endl;
 		return;
-
-	// Get the smallest key first
-	// which is in the left subtree
-	PrintTreeInOrder(node->Left);
-
-	// Print the key
-	std::cout << node->Key << " ";
-
-	// Continue to the greatest key
-	// which is in the right subtree
-	PrintTreeInOrder(node->Right);
-}
-
-void BST::PrintTreeInOrder()
-{
-	// Traverse the BST
-	// from root node
-	// then print all keys
-	PrintTreeInOrder(root);
-	std::cout << std::endl;
-}
-
-BSTNode* BST::Search(BSTNode* node, int key)
-{
-	// The given key is
-	// not found in BST
-	if (node == NULL)
-		return NULL;
-	// The given key is found
-	else if (node->Key == key)
-		return node;
-	// The given is greater than
-	// current node's key
-	else if (node->Key < key)
-		return Search(node->Right, key);
-	// The given is smaller than
-	// current node's key
-	else
-		return Search(node->Left, key);
-}
-
-bool BST::Search(int key)
-{
-	// Invoking Search() operation
-	// and passing root node
-	BSTNode* result = Search(root, key);
-
-	// If key is found, returns TRUE
-	// otherwise returns FALSE
-	return result == NULL ?
-		false :
-		true;
-}
-
-int BST::FindMin(BSTNode* node)
-{
-	if (node == NULL)
-		return -1;
-	else if (node->Left == NULL)
-		return node->Key;
-	else
-		return FindMin(node->Left);
-}
-
-int BST::FindMin()
-{
-	return FindMin(root);
-}
-
-int BST::FindMax(BSTNode* node)
-{
-	if (node == NULL)
-		return -1;
-	else if (node->Right == NULL)
-		return node->Key;
-	else
-		return FindMax(node->Right);
-}
-
-int BST::FindMax()
-{
-	return FindMax(root);
-}
-
-int BST::Successor(BSTNode* node)
-{
-	// The successor is the minimum key value
-	// of right subtree
-	if (node->Right != NULL)
-	{
-		return FindMin(node->Right);
 	}
-	// If no any right subtree
-	else
+	tree_node* curr;
+	tree_node* parent = nullptr;
+	curr = root;
+	while (curr != NULL)
 	{
-		BSTNode* parentNode = node->Parent;
-		BSTNode* currentNode = node;
-
-		// If currentNode is not root and
-		// currentNode is its right children
-		// continue moving up
-		while ((parentNode != NULL) &&
-			(currentNode == parentNode->Right))
+		if (curr->data == d)
 		{
-			currentNode = parentNode;
-			parentNode = currentNode->Parent;
+			found = true;
+			break;
 		}
-
-		// If parentNode is not NULL
-		// then the key of parentNode is
-		// the successor of node
-		return parentNode == NULL ?
-			-1 :
-			parentNode->Key;
-	}
-}
-
-int BST::Successor(int key)
-{
-	// Search the key's node first
-	BSTNode* keyNode = Search(root, key);
-
-	// Return the key.
-	// If the key is not found or
-	// successor is not found,
-	// return -1
-	return keyNode == NULL ?
-		-1 :
-		Successor(keyNode);
-}
-
-int BST::Predecessor(BSTNode* node)
-{
-	// The predecessor is the maximum key value
-	// of left subtree
-	if (node->Left != NULL)
-	{
-		return FindMax(node->Left);
-	}
-	// If no any left subtree
-	else
-	{
-		BSTNode* parentNode = node->Parent;
-		BSTNode* currentNode = node;
-
-		// If currentNode is not root and
-		// currentNode is its left children
-		// continue moving up
-		while ((parentNode != NULL) &&
-			(currentNode == parentNode->Left))
-		{
-			currentNode = parentNode;
-			parentNode = currentNode->Parent;
-		}
-
-		// If parentNode is not NULL
-		// then the key of parentNode is
-		// the predecessor of node
-		return parentNode == NULL ?
-			-1 :
-			parentNode->Key;
-	}
-}
-
-int BST::Predecessor(int key)
-{
-	// Search the key's node first
-	BSTNode* keyNode = Search(root, key);
-
-	// Return the key.
-	// If the key is not found or
-	// predecessor is not found,
-	// return -1
-	return keyNode == NULL ?
-		-1 :
-		Predecessor(keyNode);
-}
-
-BSTNode* BST::Remove(
-	BSTNode* node,
-	int key)
-{
-	// The given node is
-	// not found in BST
-	if (node == NULL)
-		return NULL;
-
-	// Target node is found
-	if (node->Key == key)
-	{
-		// If the node is a leaf node
-		// The node can be safely removed
-		if (node->Left == NULL && node->Right == NULL)
-			node = NULL;
-		// The node have only one child at right
-		else if (node->Left == NULL && node->Right != NULL)
-		{
-			// The only child will be connected to
-			// the parent's of node directly
-			node->Right->Parent = node->Parent;
-
-			// Bypass node
-			node = node->Right;
-		}
-		// The node have only one child at left
-		else if (node->Left != NULL && node->Right == NULL)
-		{
-			// The only child will be connected to
-			// the parent's of node directly
-			node->Left->Parent = node->Parent;
-
-			// Bypass node
-			node = node->Left;
-		}
-		// The node have two children (left and right)
 		else
 		{
-			// Find successor or predecessor to avoid quarrel
-			int successorKey = Successor(key);
-
-			// Replace node's key with successor's key
-			node->Key = successorKey;
-
-			// Delete the old successor's key
-			node->Right = Remove(node->Right, successorKey);
+			parent = curr;
+			if (d > curr->data) curr = curr->right;
+			else curr = curr->left;
 		}
 	}
-	// Target node's key is smaller than
-	// the given key then search to right
-	else if (node->Key < key)
-		node->Right = Remove(node->Right, key);
-	// Target node's key is greater than
-	// the given key then search to left
-	else
-		node->Left = Remove(node->Left, key);
+	if (!found)
+	{
+		cout << " Data not found! " << endl;
+		return;
+	}
 
-	// Return the updated BST
-	return node;
+	// 3 cases :
+// 1. We're removing a leaf node
+// 2. We're removing a node with a single child
+// 3. we're removing a node with 2 children
+
+// Node with single child
+	if ((curr->left == NULL && curr->right != NULL) || (curr->left != NULL
+		&& curr->right == NULL))
+	{
+		if (curr->left == NULL && curr->right != NULL)
+		{
+			if (parent->left == curr)
+			{
+				parent->left = curr->right;
+				delete curr;
+			}
+			else
+			{
+				parent->right = curr->right;
+				delete curr;
+			}
+		}
+		else // left child present, no right child
+		{
+			if (parent->left == curr)
+			{
+				parent->left = curr->left;
+				delete curr;
+			}
+			else
+			{
+				parent->right = curr->left;
+				delete curr;
+			}
+		}
+		return;
+	}
+
+	//We're looking at a leaf node
+	if (curr->left == NULL && curr->right == NULL)
+	{
+		if (parent->left == curr) parent->left = NULL;
+		else parent->right = NULL;
+		delete curr;
+		return;
+	}
+
+	//Node with 2 children
+	// replace node with smallest value in right subtree
+	if (curr->left != NULL && curr->right != NULL)
+	{
+		tree_node* chkr;
+		chkr = curr->right;
+		if ((chkr->left == NULL) && (chkr->right == NULL))
+		{
+			curr = chkr;
+			delete chkr;
+			curr->right = NULL;
+		}
+		else // right child has children
+		{
+			//if the node's right child has a left child
+			// Move all the way down left to locate smallest element
+
+			if ((curr->right)->left != NULL)
+			{
+				tree_node* lcurr;
+				tree_node* lcurrp;
+				lcurrp = curr->right;
+				lcurr = (curr->right)->left;
+				while (lcurr->left != NULL)
+				{
+					lcurrp = lcurr;
+					lcurr = lcurr->left;
+				}
+				curr->data = lcurr->data;
+				delete lcurr;
+				lcurrp->left = NULL;
+			}
+			else
+			{
+				tree_node* tmp;
+				tmp = curr->right;
+				curr->data = tmp->data;
+				curr->right = tmp->right;
+				delete tmp;
+			}
+		}
+		return;
+	}
 }
 
-void BST::Remove(int key)
+void BinarySearchTree::print_inorder()
 {
-	root = Remove(root, key);
+	inorder(root);
+}
+
+void BinarySearchTree::inorder(tree_node* p)
+{
+	if (p != NULL)
+	{
+		if (p->left) inorder(p->left);
+		cout << " " << p->data << " ";
+		if (p->right) inorder(p->right);
+	}
+	else return;
+}
+
+void BinarySearchTree::print_preorder()
+{
+	preorder(root);
+}
+
+void BinarySearchTree::preorder(tree_node* p)
+{
+	if (p != NULL)
+	{
+		cout << " " << p->data << " ";
+		if (p->left) preorder(p->left);
+		if (p->right) preorder(p->right);
+	}
+	else return;
+}
+
+void BinarySearchTree::print_postorder()
+{
+	postorder(root);
+}
+
+void BinarySearchTree::postorder(tree_node* p)
+{
+	if (p != NULL)
+	{
+		if (p->left) postorder(p->left);
+		if (p->right) postorder(p->right);
+		cout << " " << p->data << " ";
+	}
+	else return;
 }
 
 int main()
 {
-	cout << "Binary Search Tree" << endl;
-
-	// Instantiate BST instance
-	BST* tree = new BST;
-
-	// Define key value to be inserted to BST
-	int keys[] = { 23, 12, 31, 3, 15, 7, 29, 88, 53 };
-
-	// Inserting keys
-	for (const int& key : keys)
-		tree->Insert(key);
-
-	// Traversing tree in order
-	// then print all keys
-	cout << "Tree keys: ";
-	tree->PrintTreeInOrder();
-
-	// Search key 31
-	// it should be found
-	cout << "Search key 31: ";
-	bool b = tree->Search(31);
-	if (b)
-		cout << "found";
-	else
-		cout << "NOT found";
-	cout << endl;
-
-	// Search key 18
-	// it should NOT be found
-	cout << "Search key 18: ";
-	b = tree->Search(18);
-	if (b)
-		cout << "found";
-	else
-		cout << "NOT found";
-	cout << endl;
-
-	// Retrieving minimum and maximum key
-	cout << "Min. Key : " << tree->FindMin();
-	cout << endl;
-	cout << "Max. Key : " << tree->FindMax();
-	cout << endl;
-
-	// Finding successor
-	// Successor(31) should be 53
-	// Successor(15) should be 23
-	// Successor(88) should be -1 or NULL
-	cout << "Successor(31) = ";
-	cout << tree->Successor(31) << endl;
-	cout << "Successor(15) = ";
-	cout << tree->Successor(15) << endl;
-	cout << "Successor(88) = ";
-	cout << tree->Successor(88) << endl;
-
-	// Finding predecessor
-	// Predecessor(12) should be 7
-	// Predecessor(29) should be 23
-	// Predecessor(3) should be -1 or NULL
-	cout << "Predecessor(12) = ";
-	cout << tree->Predecessor(12) << endl;
-	cout << "Predecessor(29) = ";
-	cout << tree->Predecessor(29) << endl;
-	cout << "Predecessor(3) = ";
-	cout << tree->Predecessor(3) << endl;
-
-	// Removing a key
-	cout << "Removing key 15" << endl;
-	tree->Remove(15);
-	cout << "Removing key 53" << endl;
-	tree->Remove(53);
-
-	// Printing all keys again
-	// Key 15 and 53 should be disappeared
-	cout << "Tree keys: ";
-	tree->PrintTreeInOrder();
-
-	return 0;
+	BinarySearchTree b;
+	int ch, tmp, tmp1;
+	while (1)
+	{
+		cout << endl << endl;
+		cout << " Binary Search Tree Operations " << endl;
+		cout << " ----------------------------- " << endl;
+		cout << " 1. Insertion/Creation " << endl;
+		cout << " 2. In-Order Traversal " << endl;
+		cout << " 3. Pre-Order Traversal " << endl;
+		cout << " 4. Post-Order Traversal " << endl;
+		cout << " 5. Removal " << endl;
+		cout << " 6. Exit " << endl;
+		cout << " Enter your choice : ";
+		cin >> ch;
+		switch (ch)
+		{
+		case 1: cout << " Enter Number to be inserted : ";
+			cin >> tmp;
+			b.insert(tmp);
+			break;
+		case 2: cout << endl;
+			cout << " In-Order Traversal " << endl;
+			cout << " -------------------" << endl;
+			b.print_inorder();
+			break;
+		case 3: cout << endl;
+			cout << " Pre-Order Traversal " << endl;
+			cout << " -------------------" << endl;
+			b.print_preorder();
+			break;
+		case 4: cout << endl;
+			cout << " Post-Order Traversal " << endl;
+			cout << " --------------------" << endl;
+			b.print_postorder();
+			break;
+		case 5: cout << " Enter data to be deleted : ";
+			cin >> tmp1;
+			b.remove(tmp1);
+			break;
+		case 6: system("pause");
+			return 0;
+			break;
+		}
+	}
 }
