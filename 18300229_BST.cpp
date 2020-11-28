@@ -32,6 +32,7 @@ public:
 	void inorder(node*);
 	void postorder(node*);
 	void display(node*, int);
+	void eraseAll(node*);
 	BST()
 	{
 		root = NULL;
@@ -125,6 +126,7 @@ int main()
 			break;
 
 		case '8':	//Delete the whole tree
+
 			break;
 
 		case '9':	//Exit program
