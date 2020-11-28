@@ -1,59 +1,56 @@
-// 18300229_BST - Arbol Busqueda Binaria
+// 18300229_BST - Árbol Búsqueda Binaria
 # include <iostream>
 # include <cstdlib>
 #include <conio.h>
 #include <windows.h>
 using namespace std;
 
-/*
- * Class Declaration
- */
-
-struct node
+//Node structure.
+struct Node
 {
-	int key;
-	struct node* left;
-	struct node* right;
+	int nodeKey;
+	struct Node* nLeft;
+	struct Node* nRight;
 };
 
-node* root;
+Node* root;
 
+//Class containing the activities of the tree.
 class BST
 {
 public:
-
-	void find(int, node**, node**);
-	void insert(node*, node*);
-	void del(int);
-	void case_a(node*, node*);
-	void case_b(node*, node*);
-	void case_c(node*, node*);
-	void preorder(node*);
-	void inorder(node*);
-	void postorder(node*);
-	void display(node*, int);
-	void eraseAll(node*);
-	BST()
+	BST() //setting root on null.
 	{
 		root = NULL;
 	}
+	void insertKey(Node*, Node*);
+	void preOrderT(Node*);
+	void inOrderT(Node*);
+	void postOrderT(Node*);
+	void showTree(Node*, int);
+	void findKey(int, Node**, Node**);
+	void deleteNode(int);
+	void del_caseA(Node*, Node*);	//Delete a node with no children.
+	void del_caseB(Node*, Node*);	//Delete a node with 1 child.
+	void del_caseC(Node*, Node*);	//Delete a node with 2 children.
+	void deleteNodes(Node*);
+	void clearTree(Node*);
+	int getDepth(Node*);
 };
-/*
- * Main Contains Menu
- */
+
 int main()
 {
 	char choice = 0;
 	int	keyInput = 0;
 	BST bstTrial;
-	node* inputNode = nullptr;
+	Node* inputNode = nullptr;
 	do
 	{
 		char choice = 0;
 		system("cls");
 		cout << "========Binary Search Tree=========" << endl;
 
-		do //Loop until correct input
+		do //Loop until valid input
 		{
 			cout << endl << "Choose an option" << endl;
 			cout << "[1] Insert a new node." << endl;
@@ -71,23 +68,24 @@ int main()
 
 		switch (choice)
 		{
-		case '1':	//Insert new node.
+		case '1':	//Insert new Node.
 			cout << endl << "*** Press <Left control Key> on your last the node to finish inserting. ***" << endl;
 			cout << "*** Data input will automatically stop after 100 elements." << endl << endl;
 			for (int i = 0; (GetAsyncKeyState(VK_LCONTROL)) == false and i < 100; i++)
 			{
 				if ((GetAsyncKeyState(VK_LCONTROL)) == false)
 				{
-					inputNode = new node;
-					cout << "Node: ";
-					cin >> inputNode->key;
-					bstTrial.insert(root, inputNode);
+					inputNode = new Node;
+					cout << "Node's value: ";
+					cin >> inputNode->nodeKey;
+					bstTrial.insertKey(root, inputNode);
+					cout << endl;
 				}
-				GetAsyncKeyState; //Gets the current pressed key from the user.
+				GetAsyncKeyState; //Gets the current pressed nodeKey from the user.
 			}
 			break;
 
-		case '2':	//Delete a node
+		case '2':	//Delete a Node
 			if (root == NULL)
 			{
 				cout << "Tree is empty, nothing to delete" << endl;
@@ -95,38 +93,57 @@ int main()
 			}
 			cout << "Enter the number to be deleted : ";
 			cin >> keyInput;
-			bstTrial.del(keyInput);
+			bstTrial.deleteNode(keyInput);
 			break;
 
-		case '3':	//Show inorder
+		case '3':	//Show inOrderT
 			cout << "Inorder Traversal of BST:" << endl;
-			bstTrial.inorder(root);
+			bstTrial.inOrderT(root);
 			cout << endl;
 			break;
 
-		case '4':	//Show preorder
+		case '4':	//Show preOrderT
 			cout << "Preorder Traversal of BST:" << endl;
-			bstTrial.preorder(root);
+			bstTrial.preOrderT(root);
 			cout << endl;
 			break;
 
-		case '5':	//Showr postorder
+		case '5':	//Showr postOrderT
 			cout << "Postorder Traversal of BST:" << endl;
-			bstTrial.postorder(root);
+			bstTrial.postOrderT(root);
 			cout << endl;
 			break;
 
-		case '6':	//Try to print BST
-			cout << "Display BST:" << endl;
-			bstTrial.display(root, 1);
-			cout << endl;
-			break;
+		case '6':	//prints an ugly BST
+			if (root == NULL)
+			{
+				cout << "Tree is empty." << endl;
+				break;
+			}
+			else
+			{
+				cout << "Display BST:" << endl;
+				bstTrial.showTree(root, 1);
+				cout << endl;
+				break;
+			}
 
 		case '7':	//Calculate tree depth
+			cout << "The current tree depth = ";
+			cout << bstTrial.getDepth(root) << endl;
 			break;
 
 		case '8':	//Delete the whole tree
-
+			if (root == NULL)
+			{
+				cout << "Tree is empty." << endl;
+				break;
+			}
+			else
+			{
+				bstTrial.clearTree(root);
+				cout << "Tree deleted successfully" << endl;
+			}
 			break;
 
 		case '9':	//Exit program
@@ -137,207 +154,57 @@ int main()
 		default:
 			break;
 		}
-
 		cout << endl;
 		system("pause");
 	} while (1);	//Never ending loop
 }
 
-/*
- * Find Element in the Tree
- */
-void BST::find(int item, node** par, node** loc)
-{
-	node* ptr, * ptrsave;
-	if (root == NULL)
-	{
-		*loc = NULL;
-		*par = NULL;
-		return;
-	}
-	if (item == root->key)
-	{
-		*loc = root;
-		*par = NULL;
-		return;
-	}
-	if (item < root->key)
-		ptr = root->left;
-	else
-		ptr = root->right;
-	ptrsave = root;
-	while (ptr != NULL)
-	{
-		if (item == ptr->key)
-		{
-			*loc = ptr;
-			*par = ptrsave;
-			return;
-		}
-		ptrsave = ptr;
-		if (item < ptr->key)
-			ptr = ptr->left;
-		else
-			ptr = ptr->right;
-	}
-	*loc = NULL;
-	*par = ptrsave;
-}
-
-/*
- * Inserting Element into the Tree
- */
-void BST::insert(node* tree, node* newnode)
+//Inserts nodeKey (Node) to the bsTree
+void BST::insertKey(Node* bsTree, Node* inputNode)
 {
 	if (root == NULL)
 	{
-		root = new node;
-		root->key = newnode->key;
-		root->left = NULL;
-		root->right = NULL;
+		root = new Node;
+		root->nodeKey = inputNode->nodeKey;
+		root->nLeft = NULL;
+		root->nRight = NULL;
 		cout << "Root Node is Added" << endl;
 		return;
 	}
-	if (tree->key > newnode->key)
+	if (bsTree->nodeKey > inputNode->nodeKey)
 	{
-		if (tree->left != NULL)
+		if (bsTree->nLeft != NULL)
 		{
-			insert(tree->left, newnode);
+			insertKey(bsTree->nLeft, inputNode);
 		}
 		else
 		{
-			tree->left = newnode;
-			(tree->left)->left = NULL;
-			(tree->left)->right = NULL;
-			cout << "Node Added To Left" << endl;
+			bsTree->nLeft = inputNode;
+			(bsTree->nLeft)->nLeft = NULL;
+			(bsTree->nLeft)->nRight = NULL;
+			cout << "Node added to a left branch. <--" << endl;
 			return;
 		}
 	}
 	else
 	{
-		if (tree->right != NULL)
+		if (bsTree->nRight != NULL)
 		{
-			insert(tree->right, newnode);
+			insertKey(bsTree->nRight, inputNode);
 		}
 		else
 		{
-			tree->right = newnode;
-			(tree->right)->left = NULL;
-			(tree->right)->right = NULL;
-			cout << "Node Added To Right" << endl;
+			bsTree->nRight = inputNode;
+			(bsTree->nRight)->nLeft = NULL;
+			(bsTree->nRight)->nRight = NULL;
+			cout << "New node added to a right branch. -->" << endl;
 			return;
 		}
 	}
 }
 
-/*
- * Delete Element from the tree
- */
-void BST::del(int item)
-{
-	node* parent, * location;
-	if (root == NULL)
-	{
-		cout << "Tree empty" << endl;
-		return;
-	}
-	find(item, &parent, &location);
-	if (location == NULL)
-	{
-		cout << "Item not present in tree" << endl;
-		return;
-	}
-	if (location->left == NULL && location->right == NULL)
-		case_a(parent, location);
-	if (location->left != NULL && location->right == NULL)
-		case_b(parent, location);
-	if (location->left == NULL && location->right != NULL)
-		case_b(parent, location);
-	if (location->left != NULL && location->right != NULL)
-		case_c(parent, location);
-	free(location);
-	cout << "Element deleted successfully.";
-}
-
-/*
- * Case A
- */
-void BST::case_a(node* par, node* loc)
-{
-	if (par == NULL)
-	{
-		root = NULL;
-	}
-	else
-	{
-		if (loc == par->left)
-			par->left = NULL;
-		else
-			par->right = NULL;
-	}
-}
-
-/*
- * Case B
- */
-void BST::case_b(node* par, node* loc)
-{
-	node* child;
-	if (loc->left != NULL)
-		child = loc->left;
-	else
-		child = loc->right;
-	if (par == NULL)
-	{
-		root = child;
-	}
-	else
-	{
-		if (loc == par->left)
-			par->left = child;
-		else
-			par->right = child;
-	}
-}
-
-/*
- * Case C
- */
-void BST::case_c(node* par, node* loc)
-{
-	node* ptr, * ptrsave, * suc, * parsuc;
-	ptrsave = loc;
-	ptr = loc->right;
-	while (ptr->left != NULL)
-	{
-		ptrsave = ptr;
-		ptr = ptr->left;
-	}
-	suc = ptr;
-	parsuc = ptrsave;
-	if (suc->left == NULL && suc->right == NULL)
-		case_a(parsuc, suc);
-	else
-		case_b(parsuc, suc);
-	if (par == NULL)
-	{
-		root = suc;
-	}
-	else
-	{
-		if (loc == par->left)
-			par->left = suc;
-		else
-			par->right = suc;
-	}
-	suc->left = loc->left;
-	suc->right = loc->right;
-}
-
-/*
- * Pre Order Traversal
- */
-void BST::preorder(node* ptr)
+//Pre-order traversal (copy tree)
+void BST::preOrderT(Node* ptr)
 {
 	if (root == NULL)
 	{
@@ -346,15 +213,13 @@ void BST::preorder(node* ptr)
 	}
 	if (ptr != NULL)
 	{
-		cout << ptr->key << "  ";
-		preorder(ptr->left);
-		preorder(ptr->right);
+		cout << ptr->nodeKey << "  ";
+		preOrderT(ptr->nLeft);
+		preOrderT(ptr->nRight);
 	}
 }
-/*
- * In Order Traversal
- */
-void BST::inorder(node* ptr)
+//In-order traversal (shows values from smallest to largest)
+void BST::inOrderT(Node* ptr)
 {
 	if (root == NULL)
 	{
@@ -363,16 +228,14 @@ void BST::inorder(node* ptr)
 	}
 	if (ptr != NULL)
 	{
-		inorder(ptr->left);
-		cout << ptr->key << "  ";
-		inorder(ptr->right);
+		inOrderT(ptr->nLeft);
+		cout << ptr->nodeKey << "  ";
+		inOrderT(ptr->nRight);
 	}
 }
 
-/*
- * Postorder Traversal
- */
-void BST::postorder(node* ptr)
+//Post-order (used to delete and calculate depth)
+void BST::postOrderT(Node* ptr)
 {
 	if (root == NULL)
 	{
@@ -381,21 +244,19 @@ void BST::postorder(node* ptr)
 	}
 	if (ptr != NULL)
 	{
-		postorder(ptr->left);
-		postorder(ptr->right);
-		cout << ptr->key << "  ";
+		postOrderT(ptr->nLeft);
+		postOrderT(ptr->nRight);
+		cout << ptr->nodeKey << "  ";
 	}
 }
 
-/*
- * Display Tree Structure
- */
-void BST::display(node* ptr, int level)
+//displays an ugly tree
+void BST::showTree(Node* ptr, int level)
 {
 	int i;
 	if (ptr != NULL)
 	{
-		display(ptr->right, level + 1);
+		showTree(ptr->nRight, level + 1);
 		cout << endl;
 		if (ptr == root)
 			cout << "Root->:  ";
@@ -404,7 +265,176 @@ void BST::display(node* ptr, int level)
 			for (i = 0; i < level; i++)
 				cout << "       ";
 		}
-		cout << ptr->key;
-		display(ptr->left, level + 1);
+		cout << ptr->nodeKey;
+		showTree(ptr->nLeft, level + 1);
 	}
+}
+
+//Deleting a node with no children
+void BST::del_caseA(Node* parent, Node* location)
+{
+	if (parent == NULL)
+	{
+		root = NULL;
+	}
+	else
+	{
+		if (location == parent->nLeft)
+			parent->nLeft = NULL;
+		else
+			parent->nRight = NULL;
+	}
+}
+
+//Deleting a node with one nChild
+void BST::del_caseB(Node* parent, Node* location)
+{
+	Node* nChild;
+	if (location->nLeft != NULL)
+		nChild = location->nLeft;
+	else
+		nChild = location->nRight;
+	if (parent == NULL)
+	{
+		root = nChild;
+	}
+	else
+	{
+		if (location == parent->nLeft)
+			parent->nLeft = nChild;
+		else
+			parent->nRight = nChild;
+	}
+}
+
+//Deleting a full node (two children)
+void BST::del_caseC(Node* parent, Node* location)
+{
+	Node* cursorN, * tempNode, * suc, * parSuc;
+	tempNode = location;
+	cursorN = location->nRight;
+	while (cursorN->nLeft != NULL)
+	{
+		tempNode = cursorN;
+		cursorN = cursorN->nLeft;
+	}
+	suc = cursorN;
+	parSuc = tempNode;
+	if (suc->nLeft == NULL && suc->nRight == NULL)
+		del_caseA(parSuc, suc);
+	else
+		del_caseB(parSuc, suc);
+	if (parent == NULL)
+	{
+		root = suc;
+	}
+	else
+	{
+		if (location == parent->nLeft)
+			parent->nLeft = suc;
+		else
+			parent->nRight = suc;
+	}
+	suc->nLeft = location->nLeft;
+	suc->nRight = location->nRight;
+}
+
+//Find nodeKey's value on Node.
+void BST::findKey(int key, Node** parent, Node** location)
+{
+	Node* cursor, * tempPtr;
+	if (root == NULL)
+	{
+		*location = NULL;
+		*parent = NULL;
+		return;
+	}
+	if (key == root->nodeKey)
+	{
+		*location = root;
+		*parent = NULL;
+		return;
+	}
+	if (key < root->nodeKey)
+		cursor = root->nLeft;
+	else
+		cursor = root->nRight;
+	tempPtr = root;
+	while (cursor != NULL)
+	{
+		if (key == cursor->nodeKey)
+		{
+			*location = cursor;
+			*parent = tempPtr;
+			return;
+		}
+		tempPtr = cursor;
+		if (key < cursor->nodeKey)
+			cursor = cursor->nLeft;
+		else
+			cursor = cursor->nRight;
+	}
+	*location = NULL;
+	*parent = tempPtr;
+}
+
+//Calculates tree depth with recursion
+int BST::getDepth(Node* cursor)
+{
+	if (cursor == NULL)	//if node to check is NULL
+		return 0;
+
+	int leftDepth = getDepth(cursor->nLeft);
+	int rightDepth = getDepth(cursor->nRight);
+
+	int max = (leftDepth > rightDepth) ?
+		leftDepth
+		:
+		rightDepth;
+
+	return (max + 1);
+}
+
+//Deletes and specific node in BST.
+void BST::deleteNode(int item)
+{
+	Node* parent, * location;
+	if (root == NULL)
+	{
+		cout << "Tree empty" << endl;
+		return;
+	}
+	findKey(item, &parent, &location);
+	if (location == NULL)
+	{
+		cout << "Item not present in tree" << endl;
+		return;
+	}
+	if (location->nLeft == NULL && location->nRight == NULL)	//No children nodes.
+		del_caseA(parent, location);
+	if (location->nLeft != NULL && location->nRight == NULL)	//Left nChild.
+		del_caseB(parent, location);
+	if (location->nLeft == NULL && location->nRight != NULL)	//Right Child.
+		del_caseB(parent, location);
+	if (location->nLeft != NULL && location->nRight != NULL)	//Two children.
+		del_caseC(parent, location);
+
+	free(location);
+	cout << "Element deleted successfully.";
+}
+
+void BST::deleteNodes(Node* nodeCursor)	//Uses post-order traversal.
+{
+	if (nodeCursor != NULL)
+	{
+		deleteNodes(nodeCursor->nLeft);
+		deleteNodes(nodeCursor->nRight);
+		delete nodeCursor;				//Instead of printing, deletes.
+	}
+}
+
+void BST::clearTree(Node* nodeCursor)	//Deletes all nodes and then sets root to null cursor;
+{
+	deleteNodes(nodeCursor);
+	root = nullptr;
 }
